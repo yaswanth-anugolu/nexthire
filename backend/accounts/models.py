@@ -26,9 +26,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=Role.CANDIDATE
     )
 
+
     phone_number = models.CharField(
         max_length=15,
-        blank=True
+        unique=True,
+        blank=True,
+        null=True
+
     )
 
     is_active = models.BooleanField(
