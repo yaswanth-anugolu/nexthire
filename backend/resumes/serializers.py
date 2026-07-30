@@ -12,3 +12,14 @@ class ResumeSerializer(serializers.ModelSerializer):
             "uploaded_at",
             "updated_at",
         )
+        def validate_resume_file(self, value):
+            allowed_extensions = [".pdf", ".docx"]
+
+            extension = value.name.lower().rsplit(".", 1)
+
+            if len(extension) < 2 or f".{extension[-1]}" not in allowed_extensions:
+                raise serializers.ValidationError(
+                    "Only PDF and DOCX files are allowed."
+                )
+
+            return value
