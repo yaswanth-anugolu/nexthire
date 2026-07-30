@@ -1,6 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 
-# Create your views here.
 from rest_framework import generics, status
 from rest_framework.response import Response
 
@@ -16,15 +15,17 @@ class ScreenResumeView(generics.GenericAPIView):
 
     def post(self, request, application_id):
 
-        application = Application.objects.get(
-            id=application_id
+        application = get_object_or_404(
+            Application,
+            id=application_id,
         )
 
-        resume = Resume.objects.get(
-            candidate=application.candidate
+        resume = get_object_or_404(
+            Resume,
+            candidate=application.candidate,
         )
 
-        score = calculate_match_score(
+        result = calculate_match_score(
             resume.extracted_text,
             application.job.description,
         )
@@ -33,14 +34,14 @@ class ScreenResumeView(generics.GenericAPIView):
             ScreeningResult.objects.update_or_create(
                 application=application,
                 defaults={
-                    "match_score": score,
-                    "matched_skills": [],
-                    "missing_skills": [],
+                    "match_score": result["score"],
+                    "matched_skills": result["matched_skills"],
+                    "missing_skills": result["missing_skills"],
                     "recommendation": (
                         "Highly Recommended"
-                        if score >= 80
+                        if result["score"] >= 80
                         else "Recommended"
-                        if score >= 60
+                        if result["score"] >= 60
                         else "Not Recommended"
                     ),
                 },
