@@ -1,7 +1,7 @@
 from django.db import models
-
-# Create your models here.
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.utils import timezone
+
 from .managers import UserManager
 
 
@@ -12,46 +12,91 @@ class User(AbstractBaseUser, PermissionsMixin):
         RECRUITER = "RECRUITER", "Recruiter"
         CANDIDATE = "CANDIDATE", "Candidate"
 
-    email = models.EmailField(
-        unique=True
+    class Status(models.TextChoices):
+        ACTIVE = "ACTIVE", "Active"
+        INACTIVE = "INACTIVE", "Inactive"
+        SUSPENDED = "SUSPENDED", "Suspended"
+
+    username = models.CharField(
+        max_length=50,
+        unique=True,
+        db_index=True,
     )
 
-    full_name = models.CharField(
-        max_length=255
+    name = models.CharField(
+        max_length=255,
+    )
+
+    email = models.EmailField(
+        unique=True,
+        db_index=True,
+    )
+
+    phone_number = models.CharField(
+        max_length=15,
+        unique=True,
     )
 
     role = models.CharField(
         max_length=20,
         choices=Role.choices,
-        default=Role.CANDIDATE
+        default=Role.CANDIDATE,
     )
 
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+    )
 
-    phone_number = models.CharField(
-        max_length=15,
-        unique=True,
+    bio = models.TextField(
         blank=True,
-        null=True
+    )
 
+    profile_picture = models.ImageField(
+        upload_to="profile_pictures/",
+        blank=True,
+        null=True,
+    )
+
+    failed_login_attempts = models.PositiveIntegerField(
+        default=0,
+    )
+
+    lock_until = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    is_deleted = models.BooleanField(
+        default=False,
+    )
+
+    deleted_at = models.DateTimeField(
+        blank=True,
+        null=True,
     )
 
     is_active = models.BooleanField(
-        default=True
+        default=True,
     )
 
     is_staff = models.BooleanField(
-        default=False
+        default=False,
     )
 
     date_joined = models.DateTimeField(
-        auto_now_add=True
+        default=timezone.now,
     )
 
     objects = UserManager()
 
     USERNAME_FIELD = "email"
 
-    REQUIRED_FIELDS = ["full_name"]
+    REQUIRED_FIELDS = [
+        "username",
+        "name",
+    ]
 
     def __str__(self):
-        return self.email
+        return self.username

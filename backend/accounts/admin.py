@@ -1,6 +1,4 @@
 from django.contrib import admin
-
-# Register your models here.
 from django.contrib.auth.admin import UserAdmin
 
 from .models import User
@@ -8,11 +6,14 @@ from .models import User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
+
     list_display = (
         "id",
+        "username",
+        "name",
         "email",
-        "full_name",
         "role",
+        "status",
         "is_staff",
         "is_active",
         "date_joined",
@@ -20,26 +21,40 @@ class CustomUserAdmin(UserAdmin):
 
     list_filter = (
         "role",
+        "status",
         "is_staff",
         "is_active",
     )
 
     search_fields = (
+        "username",
+        "name",
         "email",
-        "full_name",
     )
 
     ordering = ("id",)
 
     fieldsets = (
         (None, {
-            "fields": ("email", "password")
+            "fields": (
+                "email",
+                "password",
+            )
         }),
         ("Personal Information", {
-            "fields": ("full_name", "phone_number")
+            "fields": (
+                "username",
+                "name",
+                "phone_number",
+                "bio",
+                "profile_picture",
+            )
         }),
-        ("Role", {
-            "fields": ("role",)
+        ("Role & Status", {
+            "fields": (
+                "role",
+                "status",
+            )
         }),
         ("Permissions", {
             "fields": (
@@ -51,7 +66,10 @@ class CustomUserAdmin(UserAdmin):
             )
         }),
         ("Important Dates", {
-            "fields": ("last_login", "date_joined")
+            "fields": (
+                "last_login",
+                "date_joined",
+            )
         }),
     )
 
@@ -59,10 +77,12 @@ class CustomUserAdmin(UserAdmin):
         (None, {
             "classes": ("wide",),
             "fields": (
+                "username",
+                "name",
                 "email",
-                "full_name",
                 "phone_number",
                 "role",
+                "status",
                 "password1",
                 "password2",
                 "is_staff",
