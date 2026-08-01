@@ -1,0 +1,1 @@
+from .recruiter_dashboard import RecruiterDashboardView

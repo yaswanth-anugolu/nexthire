@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'skills',
     'projects',
     'certifications',
+    'dashboard',
 ]
 
 MIDDLEWARE = [

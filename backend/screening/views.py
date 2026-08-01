@@ -4,7 +4,6 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 
 from applications.models import Application
-from resumes.models import Resume
 
 from .models import ScreeningResult
 from .serializers import (
@@ -23,35 +22,26 @@ class ScreenResumeView(generics.GenericAPIView):
             id=application_id,
         )
 
-        resume = get_object_or_404(
-            Resume,
-            candidate=application.candidate,
-        )
-
         result = calculate_match_score(
-            resume.extracted_text,
-            application.job.description,
+            application.candidate,
+            application.job,
         )
 
         screening_result, created = (
             ScreeningResult.objects.update_or_create(
                 application=application,
                 defaults={
-                    "match_score": result["score"],
+                    "match_score": result["overall_score"],
                     "matched_skills": result["matched_skills"],
                     "missing_skills": result["missing_skills"],
-                    "recommendation": (
-                        "Highly Recommended"
-                        if result["score"] >= 80
-                        else "Recommended"
-                        if result["score"] >= 60
-                        else "Not Recommended"
-                    ),
+                    "recommendation": result["recommendation"],
                 },
             )
         )
 
-        serializer = ScreeningResultSerializer(screening_result)
+        serializer = ScreeningResultSerializer(
+            screening_result
+        )
 
         return Response(
             serializer.data,
@@ -75,7 +65,10 @@ class CandidateRankingView(generics.GenericAPIView):
 
         rankings = []
 
-        for index, result in enumerate(screening_results, start=1):
+        for index, result in enumerate(
+            screening_results,
+            start=1,
+        ):
 
             rankings.append({
                 "rank": index,
@@ -85,6 +78,12 @@ class CandidateRankingView(generics.GenericAPIView):
                 "recommendation": result.recommendation,
             })
 
-        serializer = CandidateRankingSerializer(rankings, many=True)
+        serializer = CandidateRankingSerializer(
+            rankings,
+            many=True,
+        )
 
-        return Response(serializer.data)
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
