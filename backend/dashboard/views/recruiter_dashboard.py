@@ -15,8 +15,12 @@ class RecruiterDashboardView(generics.GenericAPIView):
 
         company = Company.objects.first()
 
-        data = get_recruiter_dashboard(company)
+        dashboard = get_recruiter_dashboard(
+            company
+        )
 
-        serializer = self.get_serializer(data)
+        serializer = self.get_serializer(
+            dashboard
+        )
 
         return Response(serializer.data)
