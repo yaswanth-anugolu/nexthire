@@ -1,46 +1,76 @@
+from django.conf import settings
 from django.db import models
 
-# Create your models here.
-from django.conf import settings
 from jobs.models import Job
 
 
 class Application(models.Model):
 
     class Status(models.TextChoices):
-        PENDING = "PENDING", "Pending"
+        APPLIED = "APPLIED", "Applied"
         SCREENING = "SCREENING", "Screening"
         SHORTLISTED = "SHORTLISTED", "Shortlisted"
         INTERVIEW = "INTERVIEW", "Interview"
-        REJECTED = "REJECTED", "Rejected"
         HIRED = "HIRED", "Hired"
+        REJECTED = "REJECTED", "Rejected"
+        WITHDRAWN = "WITHDRAWN", "Withdrawn"
 
     candidate = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="applications"
+        related_name="applications",
     )
 
     job = models.ForeignKey(
         Job,
         on_delete=models.CASCADE,
-        related_name="applications"
+        related_name="applications",
     )
 
-    cover_letter = models.TextField(blank=True)
+    resume = models.FileField(
+        upload_to="application_resumes/",
+        blank=True,
+        null=True,
+    )
+
+    cover_letter = models.TextField(
+        blank=True,
+    )
 
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
-        default=Status.PENDING
+        default=Status.APPLIED,
     )
 
-    applied_at = models.DateTimeField(auto_now_add=True)
+    ai_score = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        blank=True,
+        null=True,
+    )
 
-    updated_at = models.DateTimeField(auto_now=True)
+    recruiter_notes = models.TextField(
+        blank=True,
+    )
+
+    applied_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
 
     class Meta:
-        unique_together = ("candidate", "job")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["candidate", "job"],
+                name="unique_candidate_job",
+            )
+        ]
+
+        ordering = ("-applied_at",)
 
     def __str__(self):
-        return f"{self.candidate.email} - {self.job.title}"
+        return f"{self.candidate.username} → {self.job.title}"

@@ -1,0 +1,2 @@
+from .recruiter import RecruiterProfileSerializer
+from .candidate import CandidateProfileSerializer

@@ -12,7 +12,7 @@ class JobAdmin(admin.ModelAdmin):
         "employment_type",
         "experience_level",
         "location",
-        "is_active",
+        "status",
     )
 
     search_fields = ("title", "company__name")
@@ -20,5 +20,5 @@ class JobAdmin(admin.ModelAdmin):
     list_filter = (
         "employment_type",
         "experience_level",
-        "is_active",
+        "status",
     )

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'applications',
     'resumes',
     'screening',
+    'profiles',
 ]
 
 MIDDLEWARE = [

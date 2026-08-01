@@ -1,16 +1,16 @@
 from rest_framework import serializers
+from jobs.models import Job
 
-from .models import Company
 
-
-class CompanySerializer(serializers.ModelSerializer):
+class JobSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Company
+        model = Job
         fields = "__all__"
+
         read_only_fields = (
             "id",
-            "owner",
+            "slug",
             "created_at",
             "updated_at",
         )

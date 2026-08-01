@@ -1,7 +1,6 @@
 from django.db import models
-
-# Create your models here.
-from django.conf import settings
+from django.utils.text import slugify
+from django.core.exceptions import ValidationError
 from companies.models import Company
 
 
@@ -19,13 +18,28 @@ class Job(models.Model):
         MID = "MID", "Mid Level"
         SENIOR = "SENIOR", "Senior"
 
+    class WorkplaceType(models.TextChoices):
+        REMOTE = "REMOTE", "Remote"
+        HYBRID = "HYBRID", "Hybrid"
+        ONSITE = "ONSITE", "Onsite"
+
+    class JobStatus(models.TextChoices):
+        DRAFT = "DRAFT", "Draft"
+        OPEN = "OPEN", "Open"
+        CLOSED = "CLOSED", "Closed"
+
     company = models.ForeignKey(
         Company,
         on_delete=models.CASCADE,
-        related_name="jobs"
+        related_name="jobs",
     )
 
     title = models.CharField(max_length=255)
+
+    slug = models.SlugField(
+        unique=True,
+        blank=True,
+    )
 
     description = models.TextField()
 
@@ -35,14 +49,20 @@ class Job(models.Model):
 
     location = models.CharField(max_length=100)
 
+    workplace_type = models.CharField(
+        max_length=20,
+        choices=WorkplaceType.choices,
+        default=WorkplaceType.ONSITE,
+    )
+
     employment_type = models.CharField(
         max_length=20,
-        choices=EmploymentType.choices
+        choices=EmploymentType.choices,
     )
 
     experience_level = models.CharField(
         max_length=20,
-        choices=ExperienceLevel.choices
+        choices=ExperienceLevel.choices,
     )
 
     salary_min = models.PositiveIntegerField()
@@ -50,16 +70,43 @@ class Job(models.Model):
     salary_max = models.PositiveIntegerField()
 
     skills_required = models.TextField(
-        help_text="Comma-separated skills"
+        help_text="Comma-separated skills",
+    )
+
+    vacancies = models.PositiveIntegerField(
+        default=1,
     )
 
     deadline = models.DateField()
 
-    is_active = models.BooleanField(default=True)
+    status = models.CharField(
+        max_length=20,
+        choices=JobStatus.choices,
+        default=JobStatus.OPEN,
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    is_featured = models.BooleanField(
+        default=False,
+    )
 
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    def clean(self):
+        if self.salary_min > self.salary_max:
+            raise ValidationError(
+                "Minimum salary cannot be greater than maximum salary."
+            )
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.title
+        return f"{self.title} - {self.company.name}"
