@@ -29,6 +29,7 @@ urlpatterns = [
     path("api/screening/",include("screening.urls")),
     path("api/profiles/", include("profiles.urls")),
     path("api/jobs/", include("jobs.urls")),
+    path("api/education/", include("education.urls")),
 ]
 if settings.DEBUG:
     urlpatterns += static(
