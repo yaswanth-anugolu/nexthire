@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import ResumeView
+from .views.resume import ResumeView
 
 urlpatterns = [
     path(

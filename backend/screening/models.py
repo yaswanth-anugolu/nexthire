@@ -27,6 +27,14 @@ class ScreeningResult(models.Model):
     screened_at = models.DateTimeField(
         auto_now_add=True
     )
+    ml_prediction = models.CharField(
+    max_length=100,
+    blank=True,
+    )
+
+    ml_confidence = models.FloatField(
+        default=0,
+    )
 
     def __str__(self):
         return (

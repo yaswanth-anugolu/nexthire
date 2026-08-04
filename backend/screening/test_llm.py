@@ -1,4 +1,4 @@
-from screening.services.llm import ask_llm
+from ai.llm.client import ask_llm
 
 print(
     ask_llm(

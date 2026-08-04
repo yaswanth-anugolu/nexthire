@@ -1,26 +1,47 @@
-from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from companies.models import Company
+from jobs.models import Job
+from applications.models import Application
+from screening.models import ScreeningResult
 
-from dashboard.serializers import RecruiterDashboardSerializer
-from dashboard.services.dashboard import get_recruiter_dashboard
 
+class RecruiterDashboardView(APIView):
 
-class RecruiterDashboardView(generics.GenericAPIView):
-
-    serializer_class = RecruiterDashboardSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
 
-        company = Company.objects.first()
+        company = Company.objects.filter(
+            owner=request.user
+        ).first()
 
-        dashboard = get_recruiter_dashboard(
-            company
+        if not company:
+
+            return Response({
+                "detail": "No company found."
+            })
+
+        jobs = Job.objects.filter(
+            company=company
         )
 
-        serializer = self.get_serializer(
-            dashboard
+        applications = Application.objects.filter(
+            job__company=company
         )
 
-        return Response(serializer.data)
+        screenings = ScreeningResult.objects.filter(
+            application__job__company=company
+        )
+
+        return Response({
+
+            "jobs_posted": jobs.count(),
+
+            "applications": applications.count(),
+
+            "screenings": screenings.count(),
+
+        })

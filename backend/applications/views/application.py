@@ -16,16 +16,27 @@ class ApplicationListCreateView(generics.ListCreateAPIView):
         )
 
     def perform_create(self, serializer):
+
         job = serializer.validated_data["job"]
 
-        if not job.status == "OPEN":
+        if job.status != "OPEN":
             raise PermissionDenied(
                 "This job is not accepting applications."
             )
 
-        serializer.save(
-            candidate=self.request.user
-        )
+        if Application.objects.filter(
+            candidate=self.request.user,
+            job=job,
+        ).exists():
+            from rest_framework.exceptions import ValidationError
+
+            raise ValidationError(
+                {
+                    "error": "You have already applied for this job."
+                }
+            )
+
+        serializer.save(candidate=self.request.user)
 
 
 class ApplicationDetailView(generics.RetrieveDestroyAPIView):
@@ -36,3 +47,5 @@ class ApplicationDetailView(generics.RetrieveDestroyAPIView):
         return Application.objects.filter(
             candidate=self.request.user
         )
+    
+    
