@@ -196,8 +196,10 @@ const Profile = () => {
                 name="date_of_birth"
                 value={profile.date_of_birth}
                 onChange={handleChange}
-                InputLabelProps={{
-                  shrink: true,
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
                 }}
               />
             </Grid>
@@ -259,7 +261,7 @@ const Profile = () => {
                 onChange={handleChange}
               >
                 <MenuItem value="FRESHER">
-                  Fresher
+                  Freshhh
                 </MenuItem>
 
                 <MenuItem value="JUNIOR">

@@ -8,7 +8,8 @@ import {
 } from "@mui/material";
 
 import { useNavigate, useLocation } from "react-router-dom";
-
+import PeopleIcon from "@mui/icons-material/People";
+import SettingsIcon from "@mui/icons-material/Settings";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import SchoolIcon from "@mui/icons-material/School";
@@ -26,97 +27,47 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const user = JSON.parse(localStorage.getItem("user"));
 
-  const isRecruiter = user?.role === "RECRUITER";
 
-  const candidateMenus = [
-    {
-      title: "Dashboard",
-      icon: <DashboardIcon />,
-      path: "/candidate",
-    },
-    {
-      title: "My Profile",
-      icon: <PersonIcon />,
-      path: "/candidate/profile",
-    },
-    {
-      title: "Education",
-      icon: <SchoolIcon />,
-      path: "/candidate/education",
-    },
-    {
-      title: "Resume",
-      icon: <DescriptionIcon />,
-      path: "/candidate/resume",
-    },
-    {
-      title: "Jobs",
-      icon: <WorkIcon />,
-      path: "/candidate/jobs",
-    },
-    {
-      title: "Applications",
-      icon: <AssignmentIcon />,
-      path: "/candidate/applications",
-    },
-    {
-      title: "Resume Score",
-      icon: <AutoAwesomeIcon />,
-      path: "/candidate/resume-score",
-    },
-    {
-      title: "Career Assistant",
-      icon: <SmartToyIcon />,
-      path: "/candidate/career-assistant",
-    },
-    {
-      title: "AI Mock Interview",
-      icon: <RecordVoiceOverIcon />,
-      path: "/candidate/interview",
-    },
-    {
-      title: "Logout",
-      icon: <LogoutIcon />,
-      path: "/login",
-    },
-  ];
+  const adminMenus = [
+  {
+    title: "Dashboard",
+    icon: <DashboardIcon />,
+    path: "/admin",
+  },
+  {
+    title: "Companies",
+    icon: <BusinessCenterIcon />,
+    path: "/admin/companies",
+  },
+  {
+    title: "Recruiters",
+    icon: <PersonIcon />,
+    path: "/admin/recruiters",
+  },
+  {
+    title: "Users",
+    icon: <PeopleIcon />,
+    path: "/admin/users",
+  },
+  {
+    title: "Reports",
+    icon: <AnalyticsIcon />,
+    path: "/admin/reports",
+  },
+  {
+    title: "Settings",
+    icon: <SettingsIcon />,
+    path: "/admin/settings",
+  },
+  {
+    title: "Logout",
+    icon: <LogoutIcon />,
+    path: "/login",
+  },
+];
 
-  const recruiterMenus = [
-    {
-      title: "Dashboard",
-      icon: <DashboardIcon />,
-      path: "/recruiter",
-    },
-    {
-      title: "My Profile",
-      icon: <PersonIcon />,
-      path: "/recruiter/profile",
-    },
-    {
-      title: "Jobs",
-      icon: <BusinessCenterIcon />,
-      path: "/recruiter/jobs",
-    },
-    {
-      title: "Applications",
-      icon: <AssignmentIcon />,
-      path: "/recruiter/applications",
-    },
-    {
-      title: "Analytics",
-      icon: <AnalyticsIcon />,
-      path: "/recruiter/analytics",
-    },
-    {
-      title: "Logout",
-      icon: <LogoutIcon />,
-      path: "/login",
-    },
-  ];
-
-  const menus = isRecruiter ? recruiterMenus : candidateMenus;
+  const menus = adminMenus;
 
   return (
     <Box

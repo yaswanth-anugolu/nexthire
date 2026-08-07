@@ -7,10 +7,10 @@ import CssBaseline from "@mui/material/CssBaseline";
 import "./index.css";
 
 import App from "./App";
-
 import theme from "./theme";
-
 import { AuthProvider } from "./context/AuthContext";
+
+console.log("12345678");
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

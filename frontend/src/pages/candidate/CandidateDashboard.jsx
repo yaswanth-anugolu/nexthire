@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 import DashboardLayout from "../../layouts/DashboardLayout";
 
 import {
@@ -13,6 +15,9 @@ import PersonIcon from "@mui/icons-material/Person";
 import DescriptionIcon from "@mui/icons-material/Description";
 
 const CandidateDashboard = () => {
+
+  const navigate = useNavigate();
+
   return (
     <DashboardLayout>
       <Typography
@@ -20,7 +25,7 @@ const CandidateDashboard = () => {
         fontWeight="bold"
         gutterBottom
       >
-        Welcome Back 👋
+        Welcome test 👋
       </Typography>
 
       <Typography
@@ -28,13 +33,14 @@ const CandidateDashboard = () => {
         color="text.secondary"
         mb={4}
       >
-        Welcome to NextHire. Complete your profile and upload your resume
-        to unlock AI-powered resume analysis, job recommendations,
-        interview preparation, and much more.
+        Welcome to NextHire. Complete your profile and upload your resume to
+        unlock AI-powered resume analysis, job recommendations, interview
+        preparation, and much more.
       </Typography>
 
       <Grid container spacing={3}>
-        {/* Profile Status */}
+
+        {/* Profile */}
 
         <Grid size={{ xs: 12, md: 6 }}>
           <Card
@@ -44,6 +50,7 @@ const CandidateDashboard = () => {
             }}
           >
             <CardContent>
+
               <Box
                 display="flex"
                 alignItems="center"
@@ -71,6 +78,9 @@ const CandidateDashboard = () => {
 
               <Button
                 variant="contained"
+                onClick={() =>
+                  navigate("/candidate/profile")
+                }
                 sx={{
                   mt: 3,
                   borderRadius: 3,
@@ -79,11 +89,12 @@ const CandidateDashboard = () => {
               >
                 Complete Profile
               </Button>
+
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Resume Status */}
+        {/* Resume */}
 
         <Grid size={{ xs: 12, md: 6 }}>
           <Card
@@ -93,6 +104,7 @@ const CandidateDashboard = () => {
             }}
           >
             <CardContent>
+
               <Box
                 display="flex"
                 alignItems="center"
@@ -120,6 +132,9 @@ const CandidateDashboard = () => {
 
               <Button
                 variant="outlined"
+                onClick={() =>
+                  navigate("/candidate/resume")
+                }
                 sx={{
                   mt: 3,
                   borderRadius: 3,
@@ -128,6 +143,7 @@ const CandidateDashboard = () => {
               >
                 Upload Resume
               </Button>
+
             </CardContent>
           </Card>
         </Grid>
@@ -141,6 +157,7 @@ const CandidateDashboard = () => {
             }}
           >
             <CardContent>
+
               <Typography
                 variant="h5"
                 fontWeight={600}
@@ -151,15 +168,19 @@ const CandidateDashboard = () => {
 
               <Typography color="text.secondary">
                 No activity available yet. Once you complete your profile,
-                upload your resume, and start applying for jobs, your recent
+                upload your resume and start applying for jobs, your latest
                 activity will appear here.
               </Typography>
+
             </CardContent>
           </Card>
         </Grid>
+
       </Grid>
+
     </DashboardLayout>
   );
+
 };
 
 export default CandidateDashboard;

@@ -1,274 +1,590 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import DashboardLayout from "../../layouts/DashboardLayout";
-import api from "../../api/axios";
 
 import {
-  Typography,
+  Box,
+  Grid,
   Card,
   CardContent,
-  Grid,
+  Typography,
   Button,
-  Alert,
-  CircularProgress,
+  Avatar,
   Chip,
+  LinearProgress,
   Stack,
-  Divider,
 } from "@mui/material";
 
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import DeleteIcon from "@mui/icons-material/Delete";
-import DescriptionIcon from "@mui/icons-material/Description";
+import {
+  Description,
+  CloudUpload,
+  CheckCircle,
+} from "@mui/icons-material";
+
+const dummyResume = {
+  fileName: "Yaswanth_Resume.pdf",
+  uploadedOn: "06 Aug 2026",
+  score: 87,
+  uploaded: true,
+};
 
 const Resume = () => {
-  const [resume, setResume] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchResume();
-  }, []);
-
-  const fetchResume = async () => {
-    try {
-      const response = await api.get("resumes/");
-      setResume(response.data);
-    } catch (err) {
-      if (err.response?.status === 404) {
-        setResume(null);
-      } else {
-        setError("Unable to load resume.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFileChange = (event) => {
-    if (event.target.files.length > 0) {
-      setSelectedFile(event.target.files[0]);
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      setError("Please select a PDF or DOCX file.");
-      return;
-    }
-
-    try {
-      setUploading(true);
-      setError("");
-      setSuccess("");
-
-      const formData = new FormData();
-      formData.append("resume_file", selectedFile);
-
-      let response;
-
-      if (resume) {
-        response = await api.patch("resumes/", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-      } else {
-        response = await api.post("resumes/", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-      }
-
-      setResume(response.data);
-      setSelectedFile(null);
-      setSuccess(
-        resume ? "Resume replaced successfully." : "Resume uploaded successfully."
-      );
-
-      fetchResume();
-    } catch (err) {
-      console.log(err);
-      setError("Resume upload failed.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete your resume?")) {
-      return;
-    }
-
-    try {
-      await api.delete("resumes/");
-      setResume(null);
-      setSelectedFile(null);
-      setSuccess("Resume deleted successfully.");
-    } catch {
-      setError("Unable to delete resume.");
-    }
-  };
-
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <CircularProgress />
-      </DashboardLayout>
-    );
-  }
+  const [resume] = useState(dummyResume);
 
   return (
+
     <DashboardLayout>
-      <Typography variant="h3" fontWeight="bold" mb={4}>
-        Resume
-      </Typography>
 
-      {success && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          {success}
-        </Alert>
-      )}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 4,
+        }}
+      >
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
+        <Box>
 
-      <Card sx={{ borderRadius: 4 }}>
-        <CardContent>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12 }}>
-              {resume ? (
-                <Stack spacing={3}>
-                  <Typography variant="h5" fontWeight="bold">
-                    Current Resume
+          <Typography
+            variant="h3"
+            fontWeight="bold"
+          >
+            Resume
+          </Typography>
+
+          <Typography
+            color="text.secondary"
+            mt={1}
+          >
+            Upload, manage and improve your resume for better job matches.
+          </Typography>
+
+        </Box>
+
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<CloudUpload />}
+          sx={{
+            borderRadius: 3,
+            px: 4,
+            py: 1.5,
+          }}
+        >
+          Upload Resume
+        </Button>
+
+      </Box>
+
+      <Grid
+        container
+        spacing={3}
+      >
+
+        <Grid
+          size={{
+            xs: 12,
+            md: 4,
+          }}
+        >
+
+          <Card
+            sx={{
+              borderRadius: 5,
+              textAlign: "center",
+              height: "100%",
+            }}
+          >
+
+            <CardContent>
+
+              <Avatar
+                sx={{
+                  width: 90,
+                  height: 90,
+                  mx: "auto",
+                  mb: 2,
+                  bgcolor: "#EEF2FF",
+                }}
+              >
+                <Description
+                  sx={{
+                    color: "#4F46E5",
+                    fontSize: 50,
+                  }}
+                />
+              </Avatar>
+
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+              >
+                Resume Status
+              </Typography>
+
+              <Chip
+                color="success"
+                icon={<CheckCircle />}
+                label="Resume Uploaded"
+                sx={{ mt: 2 }}
+              />
+
+              <Typography
+                mt={4}
+                color="text.secondary"
+              >
+                ATS Resume Score
+              </Typography>
+
+              <Typography
+                variant="h3"
+                fontWeight="bold"
+                color="primary"
+              >
+                {resume.score}%
+              </Typography>
+
+              <LinearProgress
+                variant="determinate"
+                value={resume.score}
+                sx={{
+                  mt: 2,
+                  height: 10,
+                  borderRadius: 5,
+                }}
+              />
+
+            </CardContent>
+
+          </Card>
+
+        </Grid>
+
+        <Grid
+          size={{
+            xs: 12,
+            md: 8,
+          }}
+        >          <Card
+            sx={{
+              borderRadius: 5,
+            }}
+          >
+
+            <CardContent>
+
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                mb={3}
+              >
+                Resume Information
+              </Typography>
+
+              <Grid
+                container
+                spacing={3}
+              >
+
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6,
+                  }}
+                >
+
+                  <Typography
+                    color="text.secondary"
+                  >
+                    File Name
                   </Typography>
 
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <DescriptionIcon color="primary" />
-                    <Button href={resume.resume_file} target="_blank">
-                      View Resume
-                    </Button>
-                  </Stack>
-
-                  <Divider />
-
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, md: 3 }}>
-                      <Typography fontWeight="bold">Version</Typography>
-                      <Typography>{resume.version}</Typography>
-                    </Grid>
-
-                    <Grid size={{ xs: 12, md: 3 }}>
-                      <Typography fontWeight="bold">ATS Score</Typography>
-                      <Typography>{resume.ats_score}</Typography>
-                    </Grid>
-
-                    <Grid size={{ xs: 12, md: 3 }}>
-                      <Typography fontWeight="bold">Parsing Status</Typography>
-                      <Chip
-                        label={resume.parsing_status}
-                        color={
-                          resume.parsing_status === "COMPLETED"
-                            ? "success"
-                            : resume.parsing_status === "FAILED"
-                            ? "error"
-                            : "warning"
-                        }
-                      />
-                    </Grid>
-
-                    <Grid size={{ xs: 12, md: 3 }}>
-                      <Typography fontWeight="bold">Uploaded</Typography>
-                      <Typography>
-                        {new Date(resume.uploaded_at).toLocaleString()}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-
-                  {resume.extracted_text && (
-                    <>
-                      <Divider />
-
-                      <Typography variant="h6" fontWeight="bold">
-                        Extracted Resume Text
-                      </Typography>
-
-                      <Card variant="outlined">
-                        <CardContent>
-                          <Typography whiteSpace="pre-wrap">
-                            {resume.extracted_text}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </>
-                  )}
-                </Stack>
-              ) : (
-                <Typography color="text.secondary">
-                  No resume uploaded yet.
-                </Typography>
-              )}
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <Button
-                component="label"
-                variant="outlined"
-                startIcon={<UploadFileIcon />}
-              >
-                Choose Resume
-                <input
-                  hidden
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileChange}
-                />
-              </Button>
-
-              {selectedFile && (
-                <Typography mt={2}>{selectedFile.name}</Typography>
-              )}
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <Stack direction="row" spacing={2}>
-                <Button
-                  variant="contained"
-                  onClick={handleUpload}
-                  disabled={uploading}
-                >
-                  {uploading ? (
-                    <CircularProgress size={22} color="inherit" />
-                  ) : resume ? (
-                    "Replace Resume"
-                  ) : (
-                    "Upload Resume"
-                  )}
-                </Button>
-
-                {resume && (
-                  <Button
-                    color="error"
-                    variant="outlined"
-                    startIcon={<DeleteIcon />}
-                    onClick={handleDelete}
+                  <Typography
+                    fontWeight="bold"
+                    mb={3}
                   >
-                    Delete Resume
+                    {resume.fileName}
+                  </Typography>
+
+                  <Typography
+                    color="text.secondary"
+                  >
+                    Uploaded On
+                  </Typography>
+
+                  <Typography
+                    fontWeight="bold"
+                    mb={3}
+                  >
+                    {resume.uploadedOn}
+                  </Typography>
+
+                  <Typography
+                    color="text.secondary"
+                  >
+                    Resume Status
+                  </Typography>
+
+                  <Chip
+                    color="success"
+                    label="Ready for Applications"
+                    sx={{ mt: 1 }}
+                  />
+
+                </Grid>
+
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6,
+                  }}
+                >
+
+                  <Typography
+                    color="text.secondary"
+                  >
+                    AI Resume Analysis
+                  </Typography>
+
+                  <Typography
+                    variant="h4"
+                    fontWeight="bold"
+                    color="success.main"
+                    mt={1}
+                  >
+                    Excellent
+                  </Typography>
+
+                  <LinearProgress
+                    variant="determinate"
+                    value={resume.score}
+                    sx={{
+                      mt: 2,
+                      height: 10,
+                      borderRadius: 5,
+                    }}
+                  />
+
+                  <Typography
+                    color="text.secondary"
+                    mt={2}
+                  >
+                    Your resume is ATS friendly and ready to apply for jobs. Improve keywords and quantified achievements to reach a higher score.
+                  </Typography>
+
+                </Grid>
+
+              </Grid>
+
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                mt={5}
+                mb={3}
+              >
+                Resume Preview
+              </Typography>
+
+              <Card
+                variant="outlined"
+                sx={{
+                  borderRadius: 4,
+                  p: 4,
+                  bgcolor: "#F8FAFC",
+                }}
+              >
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 3,
+                  }}
+                >
+
+                  <Avatar
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      bgcolor: "#EEF2FF",
+                    }}
+                  >
+
+                    <Description
+                      sx={{
+                        color: "#4F46E5",
+                        fontSize: 45,
+                      }}
+                    />
+
+                  </Avatar>
+
+                  <Box>
+
+                    <Typography
+                      variant="h6"
+                      fontWeight="bold"
+                    >
+                      {resume.fileName}
+                    </Typography>
+
+                    <Typography
+                      color="text.secondary"
+                      mt={1}
+                    >
+                      PDF Document
+                    </Typography>
+
+                    <Typography
+                      color="text.secondary"
+                    >
+                      Uploaded on {resume.uploadedOn}
+                    </Typography>
+
+                  </Box>
+
+                </Box>
+
+              </Card>              <Typography
+                variant="h5"
+                fontWeight="bold"
+                mt={5}
+                mb={3}
+              >
+                Quick Actions
+              </Typography>
+
+              <Grid
+                container
+                spacing={2}
+              >
+
+                <Grid
+                  size={{
+                    xs: 12,
+                    sm: 6,
+                    md: 3,
+                  }}
+                >
+
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    startIcon={<Description />}
+                    sx={{
+                      py: 1.5,
+                      borderRadius: 3,
+                    }}
+                  >
+                    View Resume
                   </Button>
-                )}
-              </Stack>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+
+                </Grid>
+
+                <Grid
+                  size={{
+                    xs: 12,
+                    sm: 6,
+                    md: 3,
+                  }}
+                >
+
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    sx={{
+                      py: 1.5,
+                      borderRadius: 3,
+                    }}
+                  >
+                    Download
+                  </Button>
+
+                </Grid>
+
+                <Grid
+                  size={{
+                    xs: 12,
+                    sm: 6,
+                    md: 3,
+                  }}
+                >
+
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<CloudUpload />}
+                    sx={{
+                      py: 1.5,
+                      borderRadius: 3,
+                    }}
+                  >
+                    Replace Resume
+                  </Button>
+
+                </Grid>
+
+                <Grid
+                  size={{
+                    xs: 12,
+                    sm: 6,
+                    md: 3,
+                  }}
+                >
+
+                  <Button
+                    fullWidth
+                    color="error"
+                    variant="contained"
+                    sx={{
+                      py: 1.5,
+                      borderRadius: 3,
+                    }}
+                  >
+                    Delete
+                  </Button>
+
+                </Grid>
+
+              </Grid>
+
+              <Grid
+                container
+                spacing={3}
+                sx={{ mt: 4 }}
+              >
+
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6,
+                  }}
+                >
+
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 4,
+                      height: "100%",
+                    }}
+                  >
+
+                    <CardContent>
+
+                      <Typography
+                        variant="h6"
+                        fontWeight="bold"
+                        mb={2}
+                      >
+                        Supported Formats
+                      </Typography>
+
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        mb={3}
+                      >
+
+                        <Chip
+                          label="PDF"
+                          color="primary"
+                        />
+
+                        <Chip
+                          label="DOCX"
+                          color="success"
+                        />
+
+                      </Stack>
+
+                      <Typography
+                        color="text.secondary"
+                      >
+                        Maximum File Size
+                      </Typography>
+
+                      <Typography
+                        fontWeight="bold"
+                      >
+                        5 MB
+                      </Typography>
+
+                    </CardContent>
+
+                  </Card>
+
+                </Grid>
+
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6,
+                  }}
+                >
+
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 4,
+                      height: "100%",
+                    }}
+                  >
+
+                    <CardContent>
+
+                      <Typography
+                        variant="h6"
+                        fontWeight="bold"
+                        mb={2}
+                      >
+                        ATS Resume Tips
+                      </Typography>
+
+                      <Stack spacing={1.5}>
+
+                        <Typography>
+                          ✓ Use an ATS-friendly resume format.
+                        </Typography>
+
+                        <Typography>
+                          ✓ Keep your resume concise (1–2 pages).
+                        </Typography>
+
+                        <Typography>
+                          ✓ Add measurable achievements.
+                        </Typography>
+
+                        <Typography>
+                          ✓ Include relevant technical skills.
+                        </Typography>
+
+                        <Typography>
+                          ✓ Update your resume regularly.
+                        </Typography>
+
+                      </Stack>
+
+                    </CardContent>
+
+                  </Card>
+
+                </Grid>
+
+              </Grid>
+                          </CardContent>
+
+          </Card>
+
+        </Grid>
+
+      </Grid>
+
     </DashboardLayout>
+
   );
+
 };
 
 export default Resume;

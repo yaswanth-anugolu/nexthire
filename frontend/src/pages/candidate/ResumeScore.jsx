@@ -1,217 +1,718 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+
 import DashboardLayout from "../../layouts/DashboardLayout";
-import api from "../../api/axios";
 
 import {
-  Typography,
+  Box,
+  Grid,
   Card,
   CardContent,
-  Grid,
-  TextField,
+  Typography,
   Button,
-  Alert,
-  CircularProgress,
-  Box,
+  Avatar,
   LinearProgress,
   Chip,
-  Stack,
-  Divider,
 } from "@mui/material";
 
+import {
+  AutoAwesome,
+  Description,
+  TrendingUp,
+} from "@mui/icons-material";
+
+const dummyScore = {
+  overall: 92,
+  match: "Excellent",
+};
+
 const ResumeScore = () => {
-  const [jobDescription, setJobDescription] = useState("");
-  const [scoreData, setScoreData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [fetchingScore, setFetchingScore] = useState(true);
-  const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchLatestScore();
-  }, []);
-
-  const fetchLatestScore = async () => {
-    try {
-      setFetchingScore(true);
-      const res = await api.get("screening/scores/latest/");
-      setScoreData(res.data);
-    } catch {
-      // No previous score found or first scan
-    } finally {
-      setFetchingScore(false);
-    }
-  };
-
-  const handleAnalyze = async () => {
-    if (!jobDescription.trim()) {
-      setError("Please paste a job description to analyze.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await api.post("screening/analyze-resume/", {
-        job_description: jobDescription,
-      });
-
-      setScoreData(response.data);
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to analyze resume. Make sure your resume is uploaded in the Resume section."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getScoreColor = (score) => {
-    if (score >= 80) return "success";
-    if (score >= 50) return "warning";
-    return "error";
-  };
+  const [score] = useState(dummyScore);
 
   return (
+
     <DashboardLayout>
-      <Typography variant="h3" fontWeight="bold" mb={4}>
-        Resume Score
-      </Typography>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 4,
+          flexWrap: "wrap",
+          gap: 2,
+        }}
+      >
 
-      <Grid container spacing={3}>
-        {/* Left Column: Job Description Input */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ borderRadius: 4 }}>
+        <Box>
+
+          <Typography
+            variant="h3"
+            fontWeight="bold"
+          >
+            AI Resume Score
+          </Typography>
+
+          <Typography
+            color="text.secondary"
+            mt={1}
+          >
+            Analyze your resume against a job description and receive AI-powered recommendations.
+          </Typography>
+
+        </Box>
+
+        <Button
+          variant="contained"
+          startIcon={<Description />}
+          sx={{
+            borderRadius: 3,
+            px: 4,
+            py: 1.5,
+          }}
+        >
+          Analyze New Resume
+        </Button>
+
+      </Box>
+
+      <Grid
+        container
+        spacing={3}
+      >
+
+        <Grid
+          size={{
+            xs: 12,
+            md: 4,
+          }}
+        >
+
+          <Card
+            sx={{
+              borderRadius: 5,
+              textAlign: "center",
+              height: "100%",
+            }}
+          >
+
             <CardContent>
-              <Typography variant="h6" fontWeight="bold" mb={2}>
-                Target Job Description
-              </Typography>
 
-              <TextField
-                fullWidth
-                multiline
-                rows={8}
-                label="Job Description"
-                placeholder="Paste the job description here..."
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                sx={{ mb: 3 }}
-              />
-
-              <Button
-                variant="contained"
-                size="large"
-                onClick={handleAnalyze}
-                disabled={loading}
+              <Avatar
                 sx={{
-                  borderRadius: 3,
-                  px: 4,
-                  py: 1.5,
-                  bgcolor: "#4F46E5",
-                  "&:hover": { bgcolor: "#4338CA" },
+                  width: 90,
+                  height: 90,
+                  mx: "auto",
+                  mb: 3,
+                  bgcolor: "#EEF2FF",
                 }}
               >
-                {loading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  "Analyze Match"
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
 
-        {/* Right Column: Score & Keyword Analysis */}
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ borderRadius: 4 }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight="bold" mb={2}>
-                AI Analysis Results
+                <AutoAwesome
+                  sx={{
+                    fontSize: 50,
+                    color: "#4F46E5",
+                  }}
+                />
+
+              </Avatar>
+
+              <Typography
+                variant="h6"
+                color="text.secondary"
+              >
+                Overall ATS Score
               </Typography>
 
-              {fetchingScore ? (
-                <Box textAlign="center" py={4}>
-                  <CircularProgress />
-                </Box>
-              ) : scoreData ? (
-                <Box>
-                  <Box textAlign="center" my={3}>
-                    <Typography
-                      variant="h2"
-                      fontWeight="bold"
-                      color={`${getScoreColor(scoreData.overall_score || scoreData.score || 0)}.main`}
-                    >
-                      {scoreData.overall_score || scoreData.score || 0}%
-                    </Typography>
-                    <Typography color="text.secondary" mt={1}>
-                      Overall ATS Match Score
-                    </Typography>
-                    <Box mt={2}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={scoreData.overall_score || scoreData.score || 0}
-                        color={getScoreColor(scoreData.overall_score || scoreData.score || 0)}
-                        sx={{ height: 10, borderRadius: 5 }}
-                      />
-                    </Box>
-                  </Box>
+              <Typography
+                variant="h2"
+                fontWeight="bold"
+                color="primary"
+                mt={2}
+              >
+                {score.overall}%
+              </Typography>
 
-                  <Divider sx={{ my: 3 }} />
+              <LinearProgress
+                variant="determinate"
+                value={score.overall}
+                sx={{
+                  mt: 3,
+                  height: 12,
+                  borderRadius: 6,
+                }}
+              />
 
-                  {scoreData.matching_keywords && (
-                    <Box mb={2}>
-                      <Typography variant="subtitle2" fontWeight="bold" mb={1}>
-                        Matched Keywords:
-                      </Typography>
-                      <Stack direction="row" flexWrap="wrap" gap={1}>
-                        {scoreData.matching_keywords.map((kw, idx) => (
-                          <Chip key={idx} label={kw} color="success" size="small" />
-                        ))}
-                      </Stack>
-                    </Box>
-                  )}
+              <Typography
+                color="success.main"
+                fontWeight="bold"
+                mt={3}
+              >
+                {score.match}
+              </Typography>
 
-                  {scoreData.missing_keywords && (
-                    <Box mb={2}>
-                      <Typography variant="subtitle2" fontWeight="bold" mb={1}>
-                        Missing Keywords:
-                      </Typography>
-                      <Stack direction="row" flexWrap="wrap" gap={1}>
-                        {scoreData.missing_keywords.map((kw, idx) => (
-                          <Chip key={idx} label={kw} color="warning" size="small" />
-                        ))}
-                      </Stack>
-                    </Box>
-                  )}
+              <Typography
+                color="text.secondary"
+                mt={1}
+              >
+                Your resume is highly compatible with modern ATS systems.
+              </Typography>
 
-                  {scoreData.recommendations && (
-                    <Box mt={2}>
-                      <Typography variant="subtitle2" fontWeight="bold" mb={1}>
-                        Suggestions:
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "pre-line" }}>
-                        {scoreData.recommendations}
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-              ) : (
-                <Typography color="text.secondary" mt={2}>
-                  Your AI-generated resume score will appear here after analysis.
-                </Typography>
-              )}
             </CardContent>
+
           </Card>
+
         </Grid>
+
+        <Grid
+          size={{
+            xs: 12,
+            md: 8,
+          }}
+        >          <Card
+            sx={{
+              borderRadius: 5,
+            }}
+          >
+
+            <CardContent>
+
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                mb={4}
+              >
+                Section-wise Analysis
+              </Typography>
+
+              <Box mb={4}>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 1,
+                  }}
+                >
+
+                  <Typography fontWeight="bold">
+                    Skills
+                  </Typography>
+
+                  <Typography color="primary">
+                    95%
+                  </Typography>
+
+                </Box>
+
+                <LinearProgress
+                  variant="determinate"
+                  value={95}
+                  sx={{
+                    height: 10,
+                    borderRadius: 5,
+                  }}
+                />
+
+              </Box>
+
+              <Box mb={4}>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 1,
+                  }}
+                >
+
+                  <Typography fontWeight="bold">
+                    Projects
+                  </Typography>
+
+                  <Typography color="primary">
+                    90%
+                  </Typography>
+
+                </Box>
+
+                <LinearProgress
+                  variant="determinate"
+                  value={90}
+                  sx={{
+                    height: 10,
+                    borderRadius: 5,
+                  }}
+                />
+
+              </Box>
+
+              <Box mb={4}>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 1,
+                  }}
+                >
+
+                  <Typography fontWeight="bold">
+                    Experience
+                  </Typography>
+
+                  <Typography color="primary">
+                    88%
+                  </Typography>
+
+                </Box>
+
+                <LinearProgress
+                  variant="determinate"
+                  value={88}
+                  sx={{
+                    height: 10,
+                    borderRadius: 5,
+                  }}
+                />
+
+              </Box>
+
+              <Box mb={4}>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 1,
+                  }}
+                >
+
+                  <Typography fontWeight="bold">
+                    Education
+                  </Typography>
+
+                  <Typography color="primary">
+                    92%
+                  </Typography>
+
+                </Box>
+
+                <LinearProgress
+                  variant="determinate"
+                  value={92}
+                  sx={{
+                    height: 10,
+                    borderRadius: 5,
+                  }}
+                />
+
+              </Box>
+
+              <Box>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 1,
+                  }}
+                >
+
+                  <Typography fontWeight="bold">
+                    Resume Formatting
+                  </Typography>
+
+                  <Typography color="primary">
+                    94%
+                  </Typography>
+
+                </Box>
+
+                <LinearProgress
+                  variant="determinate"
+                  value={94}
+                  sx={{
+                    height: 10,
+                    borderRadius: 5,
+                  }}
+                />
+
+              </Box>
+
+              <Box
+                sx={{
+                  mt: 5,
+                  p: 3,
+                  borderRadius: 4,
+                  bgcolor: "#F8FAFC",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+
+                <Avatar
+                  sx={{
+                    bgcolor: "#DCFCE7",
+                  }}
+                >
+
+                  <TrendingUp
+                    sx={{
+                      color: "#16A34A",
+                    }}
+                  />
+
+                </Avatar>
+
+                <Box>
+
+                  <Typography
+                    fontWeight="bold"
+                  >
+                    Resume Performance
+                  </Typography>
+
+                  <Typography
+                    color="text.secondary"
+                  >
+                    Your resume performs better than approximately 88% of resumes analyzed for similar roles.
+                  </Typography>
+
+                </Box>
+
+              </Box>              <Typography
+                variant="h5"
+                fontWeight="bold"
+                mt={5}
+                mb={3}
+              >
+                Missing Keywords
+              </Typography>
+
+              <Grid
+                container
+                spacing={2}
+              >
+
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6,
+                  }}
+                >
+
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 4,
+                      height: "100%",
+                    }}
+                  >
+
+                    <CardContent>
+
+                      <Typography
+                        variant="h6"
+                        fontWeight="bold"
+                        color="error"
+                        mb={2}
+                      >
+                        Missing Skills
+                      </Typography>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          flexWrap: "wrap",
+                        }}
+                      >
+
+                        <Chip
+                          label="Docker"
+                          color="error"
+                        />
+
+                        <Chip
+                          label="AWS"
+                          color="error"
+                        />
+
+                        <Chip
+                          label="Redis"
+                          color="error"
+                        />
+
+                        <Chip
+                          label="CI/CD"
+                          color="error"
+                        />
+
+                        <Chip
+                          label="Kubernetes"
+                          color="error"
+                        />
+
+                      </Box>
+
+                      <Typography
+                        color="text.secondary"
+                        mt={3}
+                      >
+                        Adding these keywords can improve your ATS score for
+                        most Python Full Stack roles.
+                      </Typography>
+
+                    </CardContent>
+
+                  </Card>
+
+                </Grid>
+
+                <Grid
+                  size={{
+                    xs: 12,
+                    md: 6,
+                  }}
+                >
+
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 4,
+                      height: "100%",
+                    }}
+                  >
+
+                    <CardContent>
+
+                      <Typography
+                        variant="h6"
+                        fontWeight="bold"
+                        color="success.main"
+                        mb={2}
+                      >
+                        Strong Skills Found
+                      </Typography>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          flexWrap: "wrap",
+                        }}
+                      >
+
+                        <Chip
+                          label="Python"
+                          color="success"
+                        />
+
+                        <Chip
+                          label="React"
+                          color="success"
+                        />
+
+                        <Chip
+                          label="Django"
+                          color="success"
+                        />
+
+                        <Chip
+                          label="REST API"
+                          color="success"
+                        />
+
+                        <Chip
+                          label="MySQL"
+                          color="success"
+                        />
+
+                        <Chip
+                          label="JavaScript"
+                          color="success"
+                        />
+
+                      </Box>
+
+                      <Typography
+                        color="text.secondary"
+                        mt={3}
+                      >
+                        These keywords are well matched with the selected job
+                        description.
+                      </Typography>
+
+                    </CardContent>
+
+                  </Card>
+
+                </Grid>
+
+              </Grid>
+
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                mt={5}
+                mb={3}
+              >
+                Resume Strengths
+              </Typography>
+
+              <Card
+                variant="outlined"
+                sx={{
+                  borderRadius: 4,
+                }}
+              >
+
+                <CardContent>
+
+                  <Grid
+                    container
+                    spacing={2}
+                  >
+
+                    <Grid
+                      size={{
+                        xs: 12,
+                        md: 6,
+                      }}
+                    >
+
+                      <Typography>
+                        ✅ Strong technical skill section
+                      </Typography>
+
+                    </Grid>
+
+                    <Grid
+                      size={{
+                        xs: 12,
+                        md: 6,
+                      }}
+                    >
+
+                      <Typography>
+                        ✅ Good ATS-compatible formatting
+                      </Typography>
+
+                    </Grid>
+
+                    <Grid
+                      size={{
+                        xs: 12,
+                        md: 6,
+                      }}
+                    >
+
+                      <Typography>
+                        ✅ Relevant academic background
+                      </Typography>
+
+                    </Grid>
+
+                    <Grid
+                      size={{
+                        xs: 12,
+                        md: 6,
+                      }}
+                    >
+
+                      <Typography>
+                        ✅ Well-structured project descriptions
+                      </Typography>
+
+                    </Grid>
+
+                  </Grid>
+
+                </CardContent>
+
+              </Card>              <Typography
+                variant="h5"
+                fontWeight="bold"
+                mt={5}
+                mb={3}
+              >
+                AI Suggestions
+              </Typography>
+
+              <Card
+                variant="outlined"
+                sx={{
+                  borderRadius: 4,
+                }}
+              >
+
+                <CardContent>
+
+                  <Grid
+                    container
+                    spacing={2}
+                  >
+
+                    <Grid
+                      size={{
+                        xs: 12,
+                      }}
+                    >
+                      <Typography>
+                        💡 Add more quantified achievements to your projects (for example, "Improved API response time by 35%").
+                      </Typography>
+                    </Grid>
+
+                    <Grid
+                      size={{
+                        xs: 12,
+                      }}
+                    >
+                      <Typography>
+                        💡 Include cloud technologies such as AWS or Azure if you've worked with them.
+                      </Typography>
+                    </Grid>
+
+                    <Grid
+                      size={{
+                        xs: 12,
+                      }}
+                    >
+                      <Typography>
+                        💡 Mention Docker, CI/CD, and GitHub Actions to improve ATS keyword matching.
+                      </Typography>
+                    </Grid>
+
+                    <Grid
+                      size={{
+                        xs: 12,
+                      }}
+                    >
+                      <Typography>
+                        💡 Add certifications, internships, or hackathon achievements to strengthen your profile.
+                      </Typography>
+                    </Grid>
+
+                  </Grid>
+
+                </CardContent>
+
+              </Card>
+
+            </CardContent>
+
+          </Card>
+
+        </Grid>
+
       </Grid>
+
     </DashboardLayout>
+
   );
+
 };
 
 export default ResumeScore;
