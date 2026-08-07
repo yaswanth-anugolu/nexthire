@@ -6,11 +6,29 @@ from applications.models import Application
 from applications.serializers import ApplicationSerializer
 
 
+from accounts.permissions import IsCandidate, IsRecruiter
+
 class ApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = ApplicationSerializer
-    permission_classes = [IsCandidate]
+
+    def get_permissions(self):
+
+        if self.request.method == "POST":
+            return [IsCandidate()]
+
+        if self.request.user.role == "RECRUITER":
+            return [IsRecruiter()]
+
+        return [IsCandidate()]
 
     def get_queryset(self):
+
+        if self.request.user.role == "RECRUITER":
+
+            return Application.objects.filter(
+                job__company__recruiters__user=self.request.user
+            )
+
         return Application.objects.filter(
             candidate=self.request.user
         )
@@ -41,9 +59,21 @@ class ApplicationListCreateView(generics.ListCreateAPIView):
 
 class ApplicationDetailView(generics.RetrieveDestroyAPIView):
     serializer_class = ApplicationSerializer
-    permission_classes = [IsCandidate]
+    def get_permissions(self):
+
+        if self.request.user.role == "RECRUITER":
+            return [IsRecruiter()]
+
+        return [IsCandidate()]
 
     def get_queryset(self):
+
+        if self.request.user.role == "RECRUITER":
+
+            return Application.objects.filter(
+                job__company__recruiters__user=self.request.user
+            )
+
         return Application.objects.filter(
             candidate=self.request.user
         )

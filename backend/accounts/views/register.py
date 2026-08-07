@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.serializers import RegisterSerializer
 
@@ -15,9 +16,14 @@ class RegisterView(APIView):
 
             user = serializer.save()
 
+            # Generate JWT tokens for the newly registered user
+            refresh = RefreshToken.for_user(user)
+
             return Response(
                 {
                     "message": "User registered successfully.",
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
                     "user": {
                         "id": user.id,
                         "username": user.username,
